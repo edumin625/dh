@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대화형 텍스트 마이닝 보고서</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 300px;
+            max-height: 300px;
+            margin: 1.5rem auto 0;
+        }
+        .modal {
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+        }
+        .modal-content {
+            transition: transform 0.25s ease;
+        }
+    </style>
+</head>
+<body class="bg-blue-50 text-blue-900">
+    <!-- Chosen Palette: Blue and Gray -->
+    <!-- Application Structure Plan: 사용자가 보고서의 핵심 개념을 쉽게 탐색할 수 있도록 고정된 상단 탐색 바가 있는 단일 페이지 스크롤 앱으로 설계했습니다. 구조는 '소개', '핵심 분석 기법', '기술적 관계', '활용 사례', '결론'의 5가지 논리적 섹션으로 나뉩니다. '핵심 분석 기법' 섹션은 6가지 기법을 카드 그리드로 보여주며, 각 카드를 클릭하면 상세 내용(작동 방식, 사례)과 예시 차트(감성 분석의 경우)를 포함한 동적 모달이 열립니다. 이 구조는 긴 목록을 스크롤하는 대신 사용자가 관심 있는 기법에 집중할 수 있게 하여 사용성을 높입니다. -->
+    <!-- Visualization & Content Choices: 보고서 정보: 감성 분석 -> 목표: 기술 시연 -> 시각화: 도넛 차트 -> 상호작용: 모달에서 보기 -> 정당성: 감성 분석 결과를 시각적으로 설명 -> 라이브러리: Chart.js/Canvas. / 보고서 정보: 4단계 프로세스 -> 목표: 프로세스 설명 -> 시각화: 단계별 카드 -> 상호작용: 없음 (정적) -> 정당성: 프로세스 흐름을 명확하게 전달 -> 라이브러리: HTML/Tailwind. / 보고서 정보: NLP/빅데이터 관계 -> 목표: 개념 비교 -> 시각화: 비교 카드 -> 상호작용: 없음 -> 정당성: '엔진/자동차', '원재료/공장' 비유를 시각적으로 분리하여 강조 -> 라이브러리: HTML/Tailwind. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <header class="sticky top-0 z-50 w-full bg-blue-900 shadow-md">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <span class="text-2xl font-bold text-white">텍스트 마이닝</span>
+                <div class="hidden md:flex md:space-x-6 lg:space-x-8">
+                    <a href="#intro" class="text-blue-100 hover:text-white transition">소개</a>
+                    <a href="#process" class="text-blue-100 hover:text-white transition">프로세스</a>
+                    <a href="#techniques" class="text-blue-100 hover:text-white transition">핵심 분석 기법</a>
+                    <a href="#context" class="text-blue-100 hover:text-white transition">기술적 관계</a>
+                    <a href="#use-cases" class="text-blue-100 hover:text-white transition">주요 활용 사례</a>
+                    <a href="#conclusion" class="text-blue-100 hover:text-white transition">결론 및 미래</a>
+                </div>
+                <button id="mobile-menu-btn" class="md:hidden text-blue-100 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden bg-white py-2 shadow-lg">
+            <a href="#intro" class="block px-4 py-2 text-gray-600 hover:bg-blue-50">소개</a>
+            <a href="#process" class="block px-4 py-2 text-gray-600 hover:bg-blue-50">프로세스</a>
+            <a href="#techniques" class="block px-4 py-2 text-gray-600 hover:bg-blue-50">핵심 분석 기법</a>
+            <a href="#context" class="block px-4 py-2 text-gray-600 hover:bg-blue-50">기술적 관계</a>
+            <a href="#use-cases" class="block px-4 py-2 text-gray-600 hover:bg-blue-50">주요 활용 사례</a>
+            <a href="#conclusion" class="block px-4 py-2 text-gray-600 hover:bg-blue-50">결론 및 미래</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <section id="intro" class="mb-20 pt-16 -mt-16">
+            <h2 class="text-3xl font-bold text-center mb-4 text-blue-800">1. 텍스트 마이닝이란 무엇인가?</h2>
+            <p class="text-lg text-center text-gray-700 max-w-3xl mx-auto mb-10">
+                텍스트 마이닝은 비정형 또는 반정형 텍스트 데이터에서 가치 있고 의미 있는 정보, 패턴, 인사이트를 추출하는 기술입니다. 데이터베이스의 정형 데이터와 달리, 이메일, 뉴스, 고객 리뷰 등 컴퓨터가 이해하기 어려운 텍스트를 분석 가능한 형태로 변환하여 그 속의 숨겨진 의미를 발견하는 '텍스트 속의 보물찾기'입니다.
+            </p>
+        </section>
+
+        <section id="process" class="mb-20 pt-16 -mt-16">
+            <h2 class="text-3xl font-bold text-center mb-10 text-blue-800">텍스트 마이닝의 일반적인 프로세스</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-lg border-t-4 border-blue-500 text-center">
+                    <div class="text-5xl mb-3">🗂️</div>
+                    <h3 class="text-xl font-bold mb-2">1. 텍스트 수집</h3>
+                    <p class="text-gray-600">웹 크롤링, 문서 파일, API 등을 통해 분석 대상 텍스트 데이터를 수집합니다.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg border-t-4 border-blue-500 text-center">
+                    <div class="text-5xl mb-3">✨</div>
+                    <h3 class="text-xl font-bold mb-2">2. 텍스트 전처리</h3>
+                    <p class="text-gray-600">수집된 텍스트를 정제하고 구조화합니다. (가장 중요하고 시간이 많이 소요됨)</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg border-t-4 border-blue-500 text-center">
+                    <div class="text-5xl mb-3">📊</div>
+                    <h3 class="text-xl font-bold mb-2">3. 텍스트 분석</h3>
+                    <p class="text-gray-600">목적에 맞는 분석 기법을 적용하여 패턴과 정보를 추출합니다.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg border-t-4 border-blue-500 text-center">
+                    <div class="text-5xl mb-3">💡</div>
+                    <h3 class="text-xl font-bold mb-2">4. 결과 해석 및 활용</h3>
+                    <p class="text-gray-600">분석 결과를 시각화하고 해석하여 의사결정에 활용합니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="techniques" class="mb-20 pt-16 -mt-16">
+            <h2 class="text-3xl font-bold text-center mb-4 text-blue-800">2. 텍스트 마이닝의 주요 분석 기법</h2>
+            <p class="text-lg text-center text-gray-700 max-w-3xl mx-auto mb-10">
+                텍스트 마이닝은 분석 목적에 따라 다양한 기법을 활용합니다. 각 기법은 텍스트 데이터에서 각기 다른 유형의 인사이트를 추출하는 데 특화되어 있습니다. 아래 카드를 클릭하여 각 기법에 대해 자세히 알아보세요.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="technique-card bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer" data-key="classification">
+                    <h3 class="text-2xl font-bold mb-3 text-blue-700">가. 텍스트 분류</h3>
+                    <p class="text-gray-600 mb-4">문서를 미리 정의된 특정 카테고리(범주)로 자동 할당하는 기법입니다.</p>
+                    <span class="font-medium text-blue-600 hover:text-blue-800">자세히 보기 &rarr;</span>
+                </div>
+                <div class="technique-card bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer" data-key="clustering">
+                    <h3 class="text-2xl font-bold mb-3 text-blue-700">나. 텍스트 군집화</h3>
+                    <p class="text-gray-600 mb-4">사전 정의된 카테고리 없이 유사한 특성을 가진 문서들을 그룹(Cluster)으로 묶는 기법입니다.</p>
+                    <span class="font-medium text-blue-600 hover:text-blue-800">자세히 보기 &rarr;</span>
+                </div>
+                <div class="technique-card bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer" data-key="sentiment">
+                    <h3 class="text-2xl font-bold mb-3 text-blue-700">다. 감성 분석</h3>
+                    <p class="text-gray-600 mb-4">텍스트에 나타난 사람들의 의견, 태도, 감정(긍정, 부정, 중립)을 분석하고 식별하는 기법입니다.</p>
+                    <span class="font-medium text-blue-600 hover:text-blue-800">자세히 보기 &rarr;</span>
+                </div>
+                <div class="technique-card bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer" data-key="topic">
+                    <h3 class="text-2xl font-bold mb-3 text-blue-700">라. 토픽 모델링</h3>
+                    <p class="text-gray-600 mb-4">방대한 문서 집합에서 눈에 띄지 않는 숨겨진 '주제(Topic)'를 자동으로 발견하는 통계적 기법입니다.</p>
+                    <span class="font-medium text-blue-600 hover:text-blue-800">자세히 보기 &rarr;</span>
+                </div>
+                <div class="technique-card bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer" data-key="association">
+                    <h3 class="text-2xl font-bold mb-3 text-blue-700">마. 연관 규칙 분석</h3>
+                    <p class="text-gray-600 mb-4">텍스트 내에서 단어들이나 항목들이 얼마나 자주 함께 등장하는지, 그 연관성의 패턴을 찾는 기법입니다.</p>
+                    <span class="font-medium text-blue-600 hover:text-blue-800">자세히 보기 &rarr;</span>
+                </div>
+                <div class="technique-card bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer" data-key="ner">
+                    <h3 class="text-2xl font-bold mb-3 text-blue-700">바. 개체명 인식 (NER)</h3>
+                    <p class="text-gray-600 mb-4">텍스트에서 인명, 지명, 기관명, 날짜 등 고유한 의미를 갖는 개체(Entity)를 식별하고 추출합니다.</p>
+                    <span class="font-medium text-blue-600 hover:text-blue-800">자세히 보기 &rarr;</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="context" class="mb-20 pt-16 -mt-16">
+            <h2 class="text-3xl font-bold text-center mb-4 text-blue-800">3. 자연어 처리(NLP) 및 빅데이터와의 관계</h2>
+            <p class="text-lg text-center text-gray-700 max-w-3xl mx-auto mb-10">
+                텍스트 마이닝은 독립적인 기술이 아니라, 자연어 처리(NLP) 및 빅데이터와 밀접한 관계를 맺으며 발전하고 있습니다. 각 기술의 관계를 이해하면 텍스트 마이닝의 역할이 더 명확해집니다.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-lg shadow-lg border-l-4 border-blue-500">
+                    <h3 class="text-2xl font-bold mb-4">자연어 처리 (NLP) 와의 관계: "엔진과 자동차"</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <strong class="text-blue-700">자연어 처리 (NLP)</strong>
+                            <p class="text-gray-600">컴퓨터가 인간의 언어를 *이해하고 처리*하는 핵심 기반 기술(Engine)입니다. (예: 형태소 분석, 구문 분석)</p>
+                        </div>
+                        <div class="text-center text-3xl my-2">⬇️</div>
+                        <div>
+                            <strong class="text-blue-700">텍스트 마이닝</strong>
+                            <p class="text-gray-600">NLP를 도구(Tool)로 사용해, 실제 *가치와 인사이트를 도출*하는 응용 분야(Application)입니다.</p>
+                        </div>
+                    </div>
+                    <p class="mt-4 p-3 bg-blue-50 rounded-md text-blue-800 font-medium">
+                        <strong class="block">관계 요약:</strong> NLP라는 엔진이 있어야 텍스트 마이닝이라는 자동차가 달릴 수 있습니다.
+                    </p>
+                </div>
+                <div class="bg-white p-8 rounded-lg shadow-lg border-l-4 border-blue-500">
+                    <h3 class="text-2xl font-bold mb-4">빅데이터와의 관계: "원재료와 공장"</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <strong class="text-blue-700">빅데이터 (Big Data)</strong>
+                            <p class="text-gray-600">엄청난 양(Volume)과 다양성(Variety)을 가진 데이터 소스, 즉 '원재료'입니다. 특히 비정형 텍스트가 큰 비중을 차지합니다.</p>
+                        </div>
+                        <div class="text-center text-3xl my-2">⬇️</div>
+                        <div>
+                            <strong class="text-blue-700">텍스트 마이닝</strong>
+                            <p class="text-gray-600">이 거대한 비정형 텍스트라는 '원재료'를 처리하고 분석하여 가치를 창출하는 '공장' 역할을 합니다.</p>
+                        </div>
+                    </div>
+                    <p class="mt-4 p-3 bg-blue-50 rounded-md text-blue-800 font-medium">
+                        <strong class="block">관계 요약:</strong> 빅데이터는 분석할 '대상'을 제공하고, 텍스트 마이닝은 그 '가치'를 발견하는 핵심 도구입니다.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="use-cases" class="mb-20 pt-16 -mt-16">
+            <h2 class="text-3xl font-bold text-center mb-4 text-blue-800">4. 텍스트 마이닝의 주요 활용 사례</h2>
+            <p class="text-lg text-center text-gray-700 max-w-3xl mx-auto mb-10">
+                텍스트 마이닝은 다양한 산업 분야에서 실제 문제를 해결하고 가치를 창출하는 데 활용되고 있습니다.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <div class="text-5xl mb-4">💼</div>
+                    <h3 class="text-xl font-bold mb-2">기업 및 마케팅 (VoC 분석)</h3>
+                    <p class="text-gray-600">콜센터 로그, 고객 리뷰, SNS를 분석하여 '배터리 수명' 불만, '디자인' 칭찬 등 고객의 소리를 파악하고 차기 제품 개발 및 마케팅 전략에 반영합니다.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <div class="text-5xl mb-4">📈</div>
+                    <h3 class="text-xl font-bold mb-2">금융 (리스크 관리 및 사기 탐지)</h3>
+                    <p class="text-gray-600">뉴스, 공시 자료를 실시간 분석하여 '소송', '규제' 등 부정적 키워드를 감지하고 기업의 신용 위험이나 주가 하락 가능성을 미리 예측합니다.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <div class="text-5xl mb-4">🩺</div>
+                    <h3 class="text-xl font-bold mb-2">의료 및 바이오 (기록/논문 분석)</h3>
+                    <p class="text-gray-600">수백만 건의 의료 기록(EHR)과 의학 논문을 분석하여 특정 약물과 부작용 간의 숨겨진 연관성을 발견하거나 새로운 치료법의 단서를 찾습니다.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <div class="text-5xl mb-4">⚖️</div>
+                    <h3 class="text-xl font-bold mb-2">법률 (e-Discovery, 전자 증거 개시)</h3>
+                    <p class="text-gray-600">소송에 제출된 수백만 건의 이메일과 문서를 신속하게 분류하고, 핵심 증거가 될 내용을 검색하여 변호사의 업무 효율을 극대화합니다.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <div class="text-5xl mb-4">🏛️</div>
+                    <h3 class="text-xl font-bold mb-2">공공 및 사회 (여론 분석 및 정책 수립)</h3>
+                    <p class="text-gray-600">특정 정책 발표 후 SNS와 온라인 커뮤니티의 여론을 모니터링하여 국민의 긍/부정 반응을 파악하고 후속 정책에 반영합니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="conclusion" class="pt-16 -mt-16">
+            <h2 class="text-3xl font-bold text-center mb-4 text-blue-800">5. 결론 및 미래</h2>
+            <p class="text-lg text-center text-gray-700 max-w-3xl mx-auto mb-10">
+                텍스트 마이닝은 텍스트에 담긴 패턴과 의미를 통계적, 기계학습적 방법으로 분석하는 강력한 기술입니다. 오늘날 데이터의 80% 이상을 차지하는 비정형 텍스트 데이터의 가치를 활용하기 위한 핵심 열쇠이며, 그 중요성은 날로 커지고 있습니다.
+            </p>
+            <div class="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto border-t-4 border-blue-500">
+                <h3 class="text-2xl font-bold mb-4 text-center">미래 전망: 거대 언어 모델(LLM)의 영향</h3>
+                <p class="text-gray-700 text-center">
+                    특히 최근에는 BERT, GPT와 같은 거대 언어 모델(LLM)의 등장으로 텍스트의 미묘한 문맥까지 이해하는 정교한 분석이 가능해졌습니다. 이로 인해 텍스트 마이닝의 정확도와 활용 범위는 앞으로 더욱 폭넓게 확장될 것입니다.
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-8 mt-12 bg-blue-100 border-t border-blue-200">
+        <p class="text-gray-600">이 페이지는 텍스트 마이닝 보고서의 내용을 기반으로 생성된 대화형 웹 애플리케이션입니다.</p>
+    </footer>
+
+    <div id="technique-modal" class="modal fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 opacity-0 invisible" aria-modal="true" role="dialog">
+        <div class="modal-content bg-white w-11/12 md:max-w-2xl lg:max-w-3xl max-h-[90vh] rounded-lg shadow-xl overflow-auto p-6 md:p-8 transform scale-95">
+            <div class="flex items-center justify-between mb-4">
+                <h3 id="modal-title" class="text-2xl font-bold text-blue-700"></h3>
+                <button id="modal-close-btn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+            </div>
+            <div id="modal-body" class="space-y-4">
+                <div>
+                    <h4 class="text-lg font-bold text-gray-800">작동 방식</h4>
+                    <p id="modal-how" class="text-gray-600"></p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold text-gray-800">주요 사례</h4>
+                    <ul id="modal-examples" class="list-disc list-inside text-gray-600 space-y-1"></ul>
+                </div>
+            </div>
+            <div id="modal-chart-container" class="chart-container" style="display:none;">
+                <canvas id="sentimentChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const techniqueData = {
+                classification: {
+                    title: "가. 텍스트 분류 (Text Classification)",
+                    how: "기계 학습 모델이 사전에 레이블링된 데이터를 학습하여, 새로운 문서가 어떤 카테고리에 속할지 예측합니다.",
+                    examples: [
+                        "스팸 메일 필터링: 이메일을 '스팸' 또는 '정상'으로 분류합니다.",
+                        "뉴스 기사 분류: 기사를 '정치', '경제', '스포츠' 등 주제별로 자동 분류합니다.",
+                        "고객 문의 분류: 고객 문의 내용을 '결제 문의', '배송 문의' 등으로 자동 라우팅합니다."
+                    ],
+                    showChart: false
+                },
+                clustering: {
+                    title: "나. 텍스트 군집화 (Text Clustering)",
+                    how: "문서 간의 유사도(예: 사용된 단어의 빈도)를 계산하여 가까운 문서들끼리 그룹을 형성합니다.",
+                    examples: [
+                        "유사 문서 검색: 특정 문서와 유사한 내용을 가진 다른 문서들을 찾아냅니다.",
+                        "고객 리뷰 그룹화: 수많은 고객 리뷰를 '가격 불만', '서비스 칭찬' 등 숨겨진 주제별로 그룹화합니다."
+                    ],
+                    showChart: false
+                },
+                sentiment: {
+                    title: "다. 감성 분석 (Sentiment Analysis)",
+                    how: "감성 사전을 이용하거나, 긍/부정으로 레이블링된 데이터를 학습한 모델을 사용합니다.",
+                    examples: [
+                        "브랜드 평판 관리: 소셜 미디어, 뉴스 등에서 자사 브랜드에 대한 여론을 모니터링합니다.",
+                        "영화/제품 리뷰 분석: 리뷰의 긍/부정 비율을 분석하여 제품 개선이나 마케팅에 반영합니다."
+                    ],
+                    showChart: true
+                },
+                topic: {
+                    title: "라. 토픽 모델링 (Topic Modeling)",
+                    how: "문서들은 여러 주제의 조합으로, 주제들은 특정 단어들의 조합으로 구성된다고 가정합니다. (예: LDA 기법)",
+                    examples: [
+                        "연구 동향 분석: 수천 편의 학술 논문을 분석하여 주요 연구 주제와 그 변화를 파악합니다.",
+                        "뉴스 트렌드 파악: 대량의 뉴스 기사에서 현재 가장 이슈가 되는 주제들을 추출합니다."
+                    ],
+                    showChart: false
+                },
+                association: {
+                    title: "마. 연관 규칙 분석 (Association Rule Mining)",
+                    how: "'A가 등장하면 B도 자주 등장한다' (A -> B) 형태의 규칙을 찾습니다. (예: 지지도, 신뢰도)",
+                    examples: [
+                        "키워드 연관성 분석: '인공지능'이라는 단어가 '윤리', '일자리' 등과 얼마나 자주 함께 언급되는지 분석합니다.",
+                        "(전통적인 데이터 마이닝에서는 '장바구니 분석'으로 유명합니다.)"
+                    ],
+                    showChart: false
+                },
+                ner: {
+                    title: "바. 개체명 인식 (Named Entity Recognition, NER)",
+                    how: "텍스트에서 인명, 지명, 기관명, 날짜, 시간 등 고유한 의미를 갖는 개체를 식별하고 추출합니다.",
+                    examples: [
+                        "정보 검색: \"서울에 있는 맛집\" 검색 시 '서울(지명)'과 '맛집(대상)'을 개체로 인식합니다.",
+                        "이력서 분석: 이력서에서 '학교명', '회사명', '경력 기간' 등을 자동으로 추출합니다."
+                    ],
+                    showChart: false
+                }
+            };
+
+            const modal = document.getElementById('technique-modal');
+            const modalContent = modal.querySelector('.modal-content');
+            const modalTitle = document.getElementById('modal-title');
+            const modalHow = document.getElementById('modal-how');
+            const modalExamples = document.getElementById('modal-examples');
+            const modalChartContainer = document.getElementById('modal-chart-container');
+            const closeBtn = document.getElementById('modal-close-btn');
+            
+            let sentimentChartInstance = null;
+
+            function openModal(key) {
+                const data = techniqueData[key];
+                if (!data) return;
+
+                modalTitle.textContent = data.title;
+                modalHow.textContent = data.how;
+                
+                modalExamples.innerHTML = '';
+                data.examples.forEach(example => {
+                    const li = document.createElement('li');
+                    li.textContent = example;
+                    modalExamples.appendChild(li);
+                });
+
+                if (sentimentChartInstance) {
+                    sentimentChartInstance.destroy();
+                    sentimentChartInstance = null;
+                }
+
+                if (data.showChart) {
+                    modalChartContainer.style.display = 'block';
+                    const ctx = document.getElementById('sentimentChart').getContext('2d');
+                    sentimentChartInstance = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['긍정적 리뷰', '부정적 리뷰', '중립적 리뷰'],
+                            datasets: [{
+                                label: '리뷰 분석 결과 (예시)',
+                                data: [65, 25, 10],
+                                backgroundColor: [
+                                    'rgb(59, 130, 246)',
+                                    'rgb(220, 38, 38)',
+                                    'rgb(209, 213, 219)'
+                                ],
+                                hoverOffset: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                },
+                                title: {
+                                    display: true,
+                                    text: '제품 리뷰 감성 분석 (예시)',
+                                    font: {
+                                        size: 16
+                                    }
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    modalChartContainer.style.display = 'none';
+                }
+
+                modal.classList.remove('opacity-0', 'invisible');
+                modal.classList.add('opacity-100', 'visible');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeModal() {
+                modal.classList.add('opacity-0', 'invisible');
+                modal.classList.remove('opacity-100', 'visible');
+                modalContent.classList.add('scale-95');
+                modalContent.classList.remove('scale-100');
+                document.body.style.overflow = 'auto';
+
+                if (sentimentChartInstance) {
+                    sentimentChartInstance.destroy();
+                    sentimentChartInstance = null;
+                }
+            }
+
+            document.querySelectorAll('.technique-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    openModal(card.dataset.key);
+                });
+            });
+
+            closeBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            document.querySelectorAll('#mobile-menu a, header nav a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    if (this.hash.startsWith('#')) {
+                        e.preventDefault();
+                        const targetId = this.hash;
+                        const targetElement = document.querySelector(targetId);
+                        if(targetElement) {
+                            targetElement.scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        }
+                        if (mobileMenu.classList.contains('hidden') === false) {
+                            mobileMenu.classList.add('hidden');
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
