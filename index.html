@@ -7,12 +7,26 @@
     <style>
         /* 기본 스타일 초기화 및 폰트 설정 */
         :root {
-            --primary-blue: #1e3a8a;       /* 짙은 남색 */
-            --secondary-blue: #3b82f6;     /* 밝은 파란색 */
-            --accent-blue: #60a5fa;        /* 하늘색 */
-            --bg-color: #eff6ff;           /* 아주 연한 파란 배경 */
+            --bg-color: #f8fafc; /* 아주 연한 배경색 */
             --text-color: #1f2937;
             --white: #ffffff;
+
+            /* 카드별 컬러 팔레트 */
+            --card1-primary: #8b5cf6; /* 보라색 계열 */
+            --card1-secondary: #a78bfa;
+            --card1-accent: #c4b5fd;
+
+            --card2-primary: #10b981; /* 녹색 계열 */
+            --card2-secondary: #34d399;
+            --card2-accent: #6ee7b7;
+
+            --card3-primary: #ef4444; /* 빨간색 계열 */
+            --card3-secondary: #f87171;
+            --card3-accent: #fca5a5;
+
+            --card4-primary: #f59e0b; /* 주황색 계열 */
+            --card4-secondary: #fbbf24;
+            --card4-accent: #fcd34d;
         }
 
         * {
@@ -32,7 +46,7 @@
 
         /* 헤더 영역 */
         header {
-            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            background: linear-gradient(135deg, #1f2937, #4b5563); /* 진한 회색 계열로 변경 */
             color: var(--white);
             padding: 3rem 1rem;
             text-align: center;
@@ -62,7 +76,7 @@
 
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); /* 한 줄에 2개씩 나오도록 조정 */
             gap: 2rem;
             justify-content: center;
         }
@@ -106,16 +120,14 @@
             padding: 2rem;
         }
 
-        /* 카드 앞면 디자인 */
+        /* 카드 앞면 디자인 (각 카드별 색상 적용) */
         .card-front {
             background: var(--white);
-            color: var(--primary-blue);
-            border: 2px solid #dbeafe;
+            border: 2px solid; /* 색상은 각 카드 타입에서 오버라이드 */
+            color: var(--text-color);
         }
 
         .card-number {
-            background-color: var(--bg-color);
-            color: var(--secondary-blue);
             font-size: 1.2rem;
             font-weight: 800;
             width: 50px;
@@ -125,7 +137,8 @@
             justify-content: center;
             align-items: center;
             margin-bottom: 1.5rem;
-            border: 2px solid var(--secondary-blue);
+            border: 2px solid; /* 색상은 각 카드 타입에서 오버라이드 */
+            background-color: var(--bg-color);
         }
 
         .card-title {
@@ -145,13 +158,13 @@
             gap: 4px;
         }
 
-        /* 카드 뒷면 디자인 */
+        /* 카드 뒷면 디자인 (각 카드별 색상 적용) */
         .card-back {
-            background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue));
-            color: var(--white);
             transform: rotateY(180deg);
             text-align: left;
             align-items: flex-start;
+            color: var(--white);
+            background: linear-gradient(135deg, var(--card-secondary), var(--card-primary));
         }
 
         .card-back h3 {
@@ -172,7 +185,7 @@
 
         .card-btn {
             background-color: var(--white);
-            color: var(--primary-blue);
+            color: inherit; /* 버튼 텍스트 색상을 카드의 기본 색상에서 상속 */
             text-decoration: none;
             padding: 0.75rem 1.5rem;
             border-radius: 8px;
@@ -186,10 +199,37 @@
         .card-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            background-color: #f8fafc;
+            background-color: #f0f4f8; /* 호버 시 약간 밝아짐 */
         }
+        
+        /* 각 카드별 색상 오버라이드 */
+        .card-1 .card-front { border-color: var(--card1-accent); }
+        .card-1 .card-number { color: var(--card1-primary); border-color: var(--card1-secondary); }
+        .card-1 .card-back { background: linear-gradient(135deg, var(--card1-secondary), var(--card1-primary)); }
+        .card-1 .card-btn { color: var(--card1-primary); }
+
+        .card-2 .card-front { border-color: var(--card2-accent); }
+        .card-2 .card-number { color: var(--card2-primary); border-color: var(--card2-secondary); }
+        .card-2 .card-back { background: linear-gradient(135deg, var(--card2-secondary), var(--card2-primary)); }
+        .card-2 .card-btn { color: var(--card2-primary); }
+
+        .card-3 .card-front { border-color: var(--card3-accent); }
+        .card-3 .card-number { color: var(--card3-primary); border-color: var(--card3-secondary); }
+        .card-3 .card-back { background: linear-gradient(135deg, var(--card3-secondary), var(--card3-primary)); }
+        .card-3 .card-btn { color: var(--card3-primary); }
+
+        .card-4 .card-front { border-color: var(--card4-accent); }
+        .card-4 .card-number { color: var(--card4-primary); border-color: var(--card4-secondary); }
+        .card-4 .card-back { background: linear-gradient(135deg, var(--card4-secondary), var(--card4-primary)); }
+        .card-4 .card-btn { color: var(--card4-primary); }
+
 
         /* 반응형 모바일 처리 */
+        @media (max-width: 992px) { /* 태블릿 세로 및 작은 화면 */
+            .grid-container {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* 화면이 좁아지면 1열로 변경 */
+            }
+        }
         @media (max-width: 768px) {
             header h1 { font-size: 2rem; }
             .grid-container { gap: 1.5rem; }
@@ -206,7 +246,7 @@
     <main>
         <div class="grid-container">
             
-            <div class="card" onclick="toggleCard(this)">
+            <div class="card card-1" onclick="toggleCard(this)">
                 <div class="card-inner">
                     <div class="card-front">
                         <div class="card-number">01</div>
@@ -221,7 +261,7 @@
                 </div>
             </div>
 
-            <div class="card" onclick="toggleCard(this)">
+            <div class="card card-2" onclick="toggleCard(this)">
                 <div class="card-inner">
                     <div class="card-front">
                         <div class="card-number">02</div>
@@ -236,7 +276,7 @@
                 </div>
             </div>
 
-            <div class="card" onclick="toggleCard(this)">
+            <div class="card card-3" onclick="toggleCard(this)">
                 <div class="card-inner">
                     <div class="card-front">
                         <div class="card-number">03</div>
@@ -251,7 +291,7 @@
                 </div>
             </div>
 
-            <div class="card" onclick="toggleCard(this)">
+            <div class="card card-4" onclick="toggleCard(this)">
                 <div class="card-inner">
                     <div class="card-front">
                         <div class="card-number">04</div>
