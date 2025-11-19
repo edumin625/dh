@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DH 이해하기 - Digital Humanities</title>
+    <style>
+        /* 기본 스타일 초기화 및 폰트 설정 */
+        :root {
+            --primary-blue: #1e3a8a;       /* 짙은 남색 */
+            --secondary-blue: #3b82f6;     /* 밝은 파란색 */
+            --accent-blue: #60a5fa;        /* 하늘색 */
+            --bg-color: #eff6ff;           /* 아주 연한 파란 배경 */
+            --text-color: #1f2937;
+            --white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* 헤더 영역 */
+        header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: var(--white);
+            padding: 3rem 1rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* 메인 컨텐츠 영역 (그리드 레이아웃) */
+        main {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 1rem;
+            width: 100%;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            justify-content: center;
+        }
+
+        /* 플래시 카드 스타일 */
+        .card {
+            background-color: transparent;
+            height: 350px; /* 카드 높이 */
+            perspective: 1000px; /* 3D 효과를 위한 원근감 */
+            cursor: pointer;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 카드가 클릭되었을 때 뒤집힘 */
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        /* 카드 앞면과 뒷면 공통 설정 */
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        /* 카드 앞면 디자인 */
+        .card-front {
+            background: var(--white);
+            color: var(--primary-blue);
+            border: 2px solid #dbeafe;
+        }
+
+        .card-number {
+            background-color: var(--bg-color);
+            color: var(--secondary-blue);
+            font-size: 1.2rem;
+            font-weight: 800;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border: 2px solid var(--secondary-blue);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1.4;
+            word-break: keep-all;
+            margin-bottom: 1rem;
+        }
+
+        .click-hint {
+            margin-top: auto;
+            font-size: 0.875rem;
+            color: #9ca3af;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* 카드 뒷면 디자인 */
+        .card-back {
+            background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue));
+            color: var(--white);
+            transform: rotateY(180deg);
+            text-align: left;
+            align-items: flex-start;
+        }
+
+        .card-back h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            padding-bottom: 0.5rem;
+            width: 100%;
+        }
+
+        .card-desc {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            word-break: keep-all;
+            flex-grow: 1;
+        }
+
+        .card-btn {
+            background-color: var(--white);
+            color: var(--primary-blue);
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 700;
+            align-self: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+            text-align: center;
+        }
+
+        .card-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            background-color: #f8fafc;
+        }
+
+        /* 반응형 모바일 처리 */
+        @media (max-width: 768px) {
+            header h1 { font-size: 2rem; }
+            .grid-container { gap: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>DH 이해하기</h1>
+        <p>Understanding Digital Humanities in the AI Era</p>
+    </header>
+
+    <main>
+        <div class="grid-container">
+            
+            <div class="card" onclick="toggleCard(this)">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <div class="card-number">01</div>
+                        <div class="card-title">AI 시대의 인문학,<br>디지털인문학</div>
+                        <div class="click-hint">👆 클릭하여 내용 보기</div>
+                    </div>
+                    <div class="card-back">
+                        <h3>학습 목표</h3>
+                        <p class="card-desc">인문학 연구 패러다임 변화를 이해하고, 생성형 AI의 역할을 인식한다.</p>
+                        <a href="./01/index.html" class="card-btn">학습하기 &rarr;</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggleCard(this)">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <div class="card-number">02</div>
+                        <div class="card-title">AI의 작동 원리,<br>언어와 생각</div>
+                        <div class="click-hint">👆 클릭하여 내용 보기</div>
+                    </div>
+                    <div class="card-back">
+                        <h3>학습 목표</h3>
+                        <p class="card-desc">프롬프트 엔지니어링의 핵심 기술과 AI 모델의 작동 원리를 이해한다.</p>
+                        <a href="./02/index.html" class="card-btn">학습하기 &rarr;</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggleCard(this)">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <div class="card-number">03</div>
+                        <div class="card-title">AI로 보는 텍스트,<br>감성과 주제</div>
+                        <div class="click-hint">👆 클릭하여 내용 보기</div>
+                    </div>
+                    <div class="card-back">
+                        <h3>학습 목표</h3>
+                        <p class="card-desc">AI를 활용해 텍스트 데이터의 감정과 주제를 객관적으로 분석한다.</p>
+                        <a href="./03/index.html" class="card-btn">학습하기 &rarr;</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggleCard(this)">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <div class="card-number">04</div>
+                        <div class="card-title">AI 시대의 윤리와<br>비판적 사고</div>
+                        <div class="click-hint">👆 클릭하여 내용 보기</div>
+                    </div>
+                    <div class="card-back">
+                        <h3>학습 목표</h3>
+                        <p class="card-desc">AI 활용 시 발생하는 저작권, 표절 등의 윤리적 문제를 인식하고, 올바른 사용 태도를 확립한다.</p>
+                        <a href="./04/index.html" class="card-btn">학습하기 &rarr;</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // 카드 클릭 시 뒤집힘 효과 토글 함수
+        function toggleCard(card) {
+            card.classList.toggle('flipped');
+        }
+    </script>
+
+</body>
+</html>
